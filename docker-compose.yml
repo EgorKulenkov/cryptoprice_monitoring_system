@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    container_name: price-watchdog
+    ports:
+      - "8080:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: watchdog_db
+    env_file:
+      - .env
