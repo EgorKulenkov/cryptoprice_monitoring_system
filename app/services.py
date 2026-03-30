@@ -1,7 +1,7 @@
 import asyncio
 import httpx
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
 from .database import async_session
@@ -30,7 +30,6 @@ class CryptoService:
 
 
 async def price_watcher():
-    print("nigga")
     while True: 
         async with async_session() as db: 
             query = select(User_DB).options(selectinload(User_DB.subscriptions))
@@ -39,13 +38,19 @@ async def price_watcher():
 
             for user in users:
                 for sub in user.subscriptions:
-                    current_price = await CryptoService.get_price(sub.asset_name)
+                    if not sub.is_alerted:
+                        current_price = await CryptoService.get_price(sub.asset_name)
 
-                    if current_price < sub.target_price:
-                        print(f"{user.login}, {sub.asset_name} : {current_price}, awaitable price: {sub.target_price}", flush=True)
+                        if current_price < sub.target_price:
+                            print(f"{user.login}, {sub.asset_name} : {current_price}, awaitable price: {sub.target_price}", flush=True)
 
-                    if current_price >= sub.target_price:
-                        print(f"ALLERT {user.login}! {sub.asset_name} reach {sub.target_price}", flush=True)
+                        if current_price >= sub.target_price:
+                            print(f"ALLERT {user.login}! {sub.asset_name} reach {sub.target_price}", flush=True)
+                            sub.is_alerted = True
+                            await db.commit()
+
+                    else:
+                        print(f"sub {sub.asset_name} of {user.login} is already alerted!", flush=True)
 
         await asyncio.sleep(300)
 
