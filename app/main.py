@@ -18,7 +18,7 @@ from .services import CryptoService, price_watcher
 import httpx
 import asyncio
 
-#Pydantic models - validation for entrane data
+#Pydantic models - validation for entrance data
 #SQLAlchemy models - work with database
 
 @asynccontextmanager
@@ -35,7 +35,6 @@ app = FastAPI(lifespan=lifespan)
 async def get_db():
     async with async_session() as session:
         yield session
-
 
 @app.get("/")
 def read_root():
@@ -117,8 +116,6 @@ async def test_db(db: AsyncSession = Depends(get_db)):
 		return {"status":"ok", "details": res.scalar()}
 	except Exception as e:
 		return {"status": "it is not okay bro", "message": str(e)}
-
-
 
 @app.get("/crypto_price/{symbol}")
 async def get_crypto_price(symbol: str):
