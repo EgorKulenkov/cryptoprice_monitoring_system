@@ -13,7 +13,6 @@ class Subscription_DB(Base):
     is_alerted: Mapped[bool] = mapped_column(default=False)
     #RESTRICT - prevents deletion users if that has subs
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
- 
     owner: Mapped["User_DB"] = relationship(back_populates="subscriptions")
 
 
@@ -23,7 +22,7 @@ class User_DB(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str] = mapped_column(String(15), unique=True, nullable=False)
     
-    subscriptions: Mapped[list["Subscription_DB"]] = relationship(back_populates="owner")
+    subscriptions: Mapped[list["Subscription_DB"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
 
 
 

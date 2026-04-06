@@ -30,29 +30,32 @@ class CryptoService:
 
 
 async def price_watcher():
-    while True: 
-        async with async_session() as db: 
-            query = select(User_DB).options(selectinload(User_DB.subscriptions))
-            data = await db.execute(query)
-            users = data.scalars().all()
+    while True:
+        try:
+            async with async_session() as db: 
+                query = select(User_DB).options(selectinload(User_DB.subscriptions))
+                data = await db.execute(query)
+                users = data.scalars().all()
 
-            for user in users:
-                for sub in user.subscriptions:
-                    if not sub.is_alerted:
-                        current_price = await CryptoService.get_price(sub.asset_name)
+                for user in users:
+                    for sub in user.subscriptions:
+                        if not sub.is_alerted:
+                            current_price = await CryptoService.get_price(sub.asset_name)
 
-                        if current_price < sub.target_price:
-                            print(f"{user.login}, {sub.asset_name} : {current_price}, awaitable price: {sub.target_price}", flush=True)
+                            if current_price < sub.target_price:
+                                print(f"{user.login}, {sub.asset_name} : {current_price}, awaitable price: {sub.target_price}", flush=True)
 
-                        if current_price >= sub.target_price:
-                            print(f"ALLERT {user.login}! {sub.asset_name} reach {sub.target_price}", flush=True)
-                            sub.is_alerted = True
-                            await db.commit()
+                            if current_price >= sub.target_price:
+                                print(f"ALLERT {user.login}! {sub.asset_name} reach {sub.target_price}", flush=True)
+                                sub.is_alerted = True
+                                await db.commit()
 
-                    else:
-                        print(f"sub {sub.asset_name} of {user.login} is already alerted!", flush=True)
+                        else:
+                            print(f"sub {sub.asset_name} of {user.login} is already alerted!", flush=True)
 
-        await asyncio.sleep(300)
+            await asyncio.sleep(5)
+        except Exception as e:
+            raise HTTPException(detail=f"Error: {e}")
 
 
 

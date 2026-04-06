@@ -77,7 +77,7 @@ async def delete_user(id_user: int, db: AsyncSession = Depends(get_db)):
         return {"status":"it's not okay", "message":str(e)}
 
     if not existing_user:
-        raise HTTPException(status_code=401, detail=f"Item with {user.id} is not found!")
+        raise HTTPException(status_code=401, detail=f"User with {id_user} was not found!")
 
     try:
         await db.delete(existing_user)
@@ -86,7 +86,7 @@ async def delete_user(id_user: int, db: AsyncSession = Depends(get_db)):
         return {"status":"it's not okay", "message":str(e)}
 
     
-    return {"status":"ok", "message":f"User {user.login} was successfully deleted!"}
+    return {"status":"ok", "message":f"User {existing_user.login} was successfully deleted!"}
 
 
 @app.get("/get_all_users")
