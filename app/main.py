@@ -17,6 +17,7 @@ from .services import CryptoService, price_watcher
 
 import httpx
 import asyncio
+import logging
 
 #Pydantic models - validation for entrance data
 #SQLAlchemy models - work with database
@@ -25,8 +26,15 @@ import asyncio
 async def lifespan(app: FastAPI):
     #before FastAPI will get requests
     await init_models()
+
+    logging.basicConfig(
+            level=logging.INFO,
+            force=True
+            )
+    logger = logging.getLogger(__name__)
+
     task = asyncio.create_task(price_watcher())
-    print("background task initialized")
+    logger.info("background task initialized")
     yield 
     task.cancel()
 

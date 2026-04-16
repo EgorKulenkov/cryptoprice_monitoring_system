@@ -6,6 +6,10 @@ from sqlalchemy.orm import selectinload
 
 from .database import async_session
 from .models import User_DB, Subscription_DB
+#from .log import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CryptoService:
     BASE_URL = "https://api.binance.com/api/v3/ticker/price"
@@ -43,17 +47,17 @@ async def price_watcher():
                             current_price = await CryptoService.get_price(sub.asset_name)
 
                             if current_price < sub.target_price:
-                                print(f"{user.login}, {sub.asset_name} : {current_price}, awaitable price: {sub.target_price}", flush=True)
+                                logger.info(f"{user.login}, {sub.asset_name} : {current_price}, awaitable price: {sub.target_price}")
 
                             if current_price >= sub.target_price:
-                                print(f"ALLERT {user.login}! {sub.asset_name} reach {sub.target_price}", flush=True)
+                                logger.info(f"ALLERT {user.login}! {sub.asset_name} reach {sub.target_price}")
                                 sub.is_alerted = True
                                 await db.commit()
 
                         else:
-                            print(f"sub {sub.asset_name} of {user.login} is already alerted!", flush=True)
+                            logger.info(f"sub {sub.asset_name} of {user.login} is already alerted!")
 
-            await asyncio.sleep(5)
+            await asyncio.sleep(300)
         except Exception as e:
             raise HTTPException(detail=f"Error: {e}")
 
